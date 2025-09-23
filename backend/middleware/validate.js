@@ -12,7 +12,13 @@ const logbody = zod.object({
     password : zod.string().min(4)
 })
 
+const createTask = zod.object({
+    title : zod.string(),
+    description : zod.string().optional()
+})
+
 module.exports = {
     regbody,
-    logbody
+    logbody,
+    createTask
 }
