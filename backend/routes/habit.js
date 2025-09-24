@@ -14,7 +14,7 @@ const auth = require('../middleware/auth.js')
 
 
 router.post('/add',auth,addHabit)
-router.get('/find',auth,findHabit)
+router.get('/view',auth,findHabit)
 router.get('/:id/find',auth,findOneHabit)
 router.patch('/:id/complete',auth,markHabitComplete)
 router.patch('/:id/update',auth,updateHabit)
