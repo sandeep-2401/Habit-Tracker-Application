@@ -2,13 +2,15 @@ const jwt = require('jsonwebtoken')
 const JWT_TOKEN = process.env.JWT_TOKEN
 
 const usermiddleware = async(req,res,next)=>{
-    const token = req.headers.authorization
+    let token = req.headers.authorization
 
     if (!token){
         res.status(403).json({
             msg : 'invalid authorization header'
         })
     }
+
+    token = token.split(" ")[1];
 
     try {
         const verified = jwt.verify(token,JWT_TOKEN)
@@ -18,7 +20,7 @@ const usermiddleware = async(req,res,next)=>{
 
     catch(err){
         res.status(403).json({
-            msg : "error verifying headers"
+            msg : `error verifying headers ${verified.userId}`
         })
     }
 }
