@@ -63,7 +63,7 @@ const login = async(req,res)=>{
     if(user){
         const token = jwt.sign({userId : user._id},JWT_TOKEN)
         res.status(200).json({
-            msg : token
+            token : token
         })
     }
     else{
