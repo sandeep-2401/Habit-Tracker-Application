@@ -13,7 +13,6 @@ export default function LoginPage() {
   ];
   const [quote, setQuote] = useState(quotes[0]);
 
-  // Animate quote change every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
@@ -47,7 +46,6 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 overflow-hidden px-4">
 
-      {/* Layered Background Blobs */}
       <motion.div
         animate={{ scale: [1, 1.05, 1], rotate: [0, 5, 0] }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
@@ -64,14 +62,12 @@ export default function LoginPage() {
         className="absolute top-[10%] right-[-15%] w-72 h-72 bg-pink-300 rounded-full filter blur-2xl opacity-20"
       />
 
-      {/* Glassy Card */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="relative w-full max-w-md bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-12 border border-gray-200 z-10"
       >
-        {/* Header */}
         <h1 className="text-3xl font-bold text-gray-900">Welcome Back 👋</h1>
         <motion.p
           key={quote} // Animate on quote change
@@ -83,9 +79,7 @@ export default function LoginPage() {
           {quote}
         </motion.p>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">Email</label>
             <input
@@ -100,7 +94,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">Password</label>
             <input
@@ -115,10 +108,8 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Error */}
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          {/* Submit Button */}
           <motion.div whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }}>
             <button
               type="submit"
@@ -131,10 +122,18 @@ export default function LoginPage() {
           </motion.div>
         </form>
 
-        {/* Footer / Streak Info */}
-        {/* <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
-          <span className="flex items-center gap-1 animate-pulse">🔥 5-day streak active</span>
-        </div> */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-500">
+            Don't have an account?{" "}
+            <button
+              onClick={() => navigate("/register")}
+              className="text-emerald-600 font-semibold hover:underline"
+            >
+              Sign Up
+            </button>
+          </p>
+        </div>
+        
       </motion.div>
     </div>
   );

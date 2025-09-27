@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { register } from "../services/authServices";
-import { useAsyncError, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function RegistrationPage() {
   const navigate = useNavigate();
@@ -52,22 +52,18 @@ export default function RegistrationPage() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 px-4 overflow-hidden">
-      {/* Background Blobs */}
       <div className="absolute top-[-10%] left-[-20%] w-96 h-96 bg-emerald-300 rounded-full filter blur-3xl opacity-30 animate-pulse"></div>
       <div className="absolute bottom-[-15%] right-[-25%] w-[500px] h-[500px] bg-sky-300 rounded-full filter blur-3xl opacity-30 animate-pulse"></div>
 
-      {/* Card */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-gray-200 z-10"
       >
-        {/* Header */}
         <h1 className="text-2xl font-bold text-gray-900 text-left">Create your account</h1>
         <p className="text-sm text-gray-500 mt-1 text-left">{quote}</p>
 
-        {/* Form */}
         <form 
             onSubmit={handleSubmit}
             className="mt-8 space-y-4">
@@ -121,7 +117,19 @@ export default function RegistrationPage() {
           </motion.div>
         </form>
 
-        {/* Footer */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-500">
+            Already have an account?{" "}
+            <button
+              onClick={() => navigate("/login")}
+              className="text-emerald-600 font-semibold hover:underline"
+            >
+              Login
+            </button>
+          </p>
+        </div>
+
+
         <div className="mt-6 text-center">
           <span className="text-sm text-gray-500">🔥 Start your streak today!</span>
         </div>
