@@ -16,7 +16,8 @@ const addHabit = async(req,res)=>{
     const newHabit = await Habit.create({
         userId : req.userId,
         title : req.body.title,
-        description : req.body.description
+        description : req.body.description,
+        category: req.body.category
     })
 
     if(newHabit){
@@ -148,7 +149,7 @@ const deleteHabit = async(req,res)=>{
 const updateHabit = async(req,res)=>{
     const userId = req.userId
     const habitId = req.params.id
-    const {title,description} = req.body
+    const {title,description,category} = req.body
 
     if (!mongoose.Types.ObjectId.isValid(habitId)) {
         return res.status(400).json({ msg: "Invalid habit ID" });
@@ -157,6 +158,7 @@ const updateHabit = async(req,res)=>{
     const updatedField = {}
     if (title) updatedField.title = title
     if (description) updatedField.description = description
+    if (category) updatedField.category = category
 
     const updatedHabit = await Habit.findOneAndUpdate(
         { userId, _id : habitId },

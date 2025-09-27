@@ -1,4 +1,5 @@
 const Habit = require('../model/Habit')
+const User = require('../model/user')
 
 const userFeed = async(req,res)=>{
     const userId = req.userId
@@ -30,131 +31,94 @@ const userFeed = async(req,res)=>{
     })
 }
 
-const dailyFeed = async(req,res)=>{
-    const userId = req.userId
+const userDetails = async(req,res)=>{
+  try{
+    const id = req.userId;
+    const result = await User.findById(id).select("-password")
 
-    let habits = await Habit.find({
-        userId,
-    })
-
-    if(habits.length === 0){
-        return res.status(404).json({
-            msg : "unable to find any habits"
-        })
-    }
-
-    const totalHabits = habits.length
-    const today = new Date().toDateString()
-    let completedHabits =0;
-
-    habits.forEach(habit=>{
-        habit.history.forEach(h => {
-            const thisDate = new Date(h.date).toDateString()
-            if(thisDate === today && h.completed === true){
-                completedHabits +=1
-            }
-        })
+    if(!result) res.status(404).json({
+      user : "user not found"
     })
 
     res.json({
-            totalHabits,
-            completedHabits,
-            date : today,
-            completionRate: totalHabits === 0 ? 0 : Math.floor((completedHabits / totalHabits) * 100) + '%'
-        }
-    )
+      user : result
+    })
+  }
+  catch (err){
+    res.status(500).json({
+      error : "server error"
+    })
+  }
 }
 
-const weeklyFeed = async (req, res) => {
-    try {
-        const userId = req.userId;
-
-        const habits = await Habit.find({ userId });
-
-        if (habits.length === 0) {
-            return res.status(404).json({
-                msg: "Unable to find any habits" 
-            });
-        }
-
-        const totalHabits = habits.length;
-
-        const today = new Date();
-        const firstDay = new Date(today);
-        firstDay.setDate(today.getDate() - 7);
-        firstDay.setHours(0, 0, 0, 0); 
-        today.setHours(23, 59, 59, 999);
-
-        let completedHabits = 0;
-
-        habits.forEach(habit => {
-            habit.history.forEach(entry => {
-                const entryDate = new Date(entry.date);
-                if (entryDate >= firstDay && entryDate <= today && entry.completed) {
-                    completedHabits += 1;
-                }
-            });
-        });
-
-        const totalPossible = totalHabits * 7;
-
-        res.status(200).json({
-            range: `${firstDay.toDateString()} to ${today.toDateString()}`,
-            totalPossible,
-            completed: completedHabits,
-            completionRate: totalPossible === 0 ? 0 : Math.floor((completedHabits / totalPossible) * 100)
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: "Server error while fetching weekly feed" });
-    }
-};
-
-const monthlyFeed = async (req, res) => {
+const chart = async (req, res) => {
+  try {
     const userId = req.userId;
+    const range = parseInt(req.query.range) || 7;
 
-    let habits = await Habit.find({ userId });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - (range - 1));
 
-    if (habits.length === 0) {
-        return res.status(404).json({
-            msg: "unable to find any habits"
-        });
+    const habits = await Habit.find({ userId });
+
+    const dailyCounts = [];
+    for (let i = 0; i < range; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      const formattedDate = date.toISOString().split('T')[0];
+      dailyCounts.push({ date: formattedDate, completed: 0 });
     }
 
-    const totalHabits = habits.length;
-
-    let today = new Date();
-    let firstDay = new Date(today);
-    firstDay.setDate(firstDay.getDate() - 30);
-
-    let completedHabits = 0;
+    let totalCompleted = 0;
+    let totalPossible = 0;
 
     habits.forEach(habit => {
-        habit.history.forEach(h => {
-            const thisDate = new Date(h.date);
-            if (thisDate >= firstDay && thisDate <= today && h.completed === true) {
-                completedHabits += 1;
-            }
-        });
+      const created = new Date(habit.createdAt);
+      const habitStart = created > startDate ? created : startDate;
+      const daysExisted = Math.floor((today - habitStart) / (1000 * 60 * 60 * 24)) + 1;
+      totalPossible += daysExisted;
+
+      const completedInRange = habit.history.filter(entry => {
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0, 0, 0, 0);
+        return entryDate >= startDate && entryDate <= today && entry.completed;
+      }).length;
+
+      totalCompleted += completedInRange;
+
+      habit.history.forEach(entry => {
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0, 0, 0, 0);
+        if (entryDate >= startDate && entryDate <= today) {
+          const idx = Math.floor((entryDate - startDate) / (1000 * 60 * 60 * 24));
+          if (idx >= 0 && idx < range) {
+            dailyCounts[idx].completed += 1;
+          }
+        }
+      });
     });
 
-    const totalPossible = totalHabits * 30;
-
-    res.json({
-        totalHabits,
-        completedHabits,
-        dateRange: `${firstDay.toDateString()} to ${today.toDateString()}`,
-        completionRate: totalPossible === 0 
-            ? "0%" 
-            : Math.floor((completedHabits / totalPossible) * 100) + "%"
+    const categoryCounts = {};
+    habits.forEach(habit => {
+      const category = habit.category || "Uncategorized";
+      categoryCounts[category] = (categoryCounts[category] || 0) + 1;
     });
+
+    const completionRate = totalPossible > 0 ? ((totalCompleted / totalPossible) * 100).toFixed(1) : 0;
+
+    res.json({ dailyCounts, categoryCounts, totalHabits: habits.length, totalCompleted, totalPossible, completionRate });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
+
 
 
 module.exports ={
     userFeed,
-    dailyFeed,
-    weeklyFeed,
-    monthlyFeed
+    chart,
+    userDetails
 }

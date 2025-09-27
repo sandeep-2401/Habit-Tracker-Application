@@ -16,6 +16,11 @@ const habitSchema = new mongoose.Schema(
         type : String,
         trim : true
     },
+    category: {
+        type: String,
+        enum: ["Health", "Study", "Work", "Hobbies"],
+        default: "Health",
+    },
     streak : {
         type : Number,
         default : 0
