@@ -123,7 +123,7 @@ export default function LandingPage() {
       <footer className="relative bg-white/70 backdrop-blur-md border-t border-gray-200 py-6 mt-4">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center px-4">
           <div className="text-gray-900 font-bold text-xl mb-2 md:mb-0">
-            HabitTrack
+            HabitTracker
           </div>
           <div className="text-gray-500 text-sm">
             Made with 💜 for habit lovers
